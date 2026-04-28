@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Survey Kepuasan Nasabah – Bank Akasia Mas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { jakarta: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              50:  '#fef2f2',
+              100: '#fde4e4',
+              200: '#fbbfbf',
+              400: '#f06b6b',
+              600: '#c0392b',
+              700: '#9b2335',
+              800: '#7f1d1d',
+              900: '#5c1414',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .chip {
+      transition: all 0.18s ease;
+    }
+    .chip.active {
+      background: #7f1d1d;
+      color: #fff;
+      border-color: #7f1d1d;
+    }
+    .single-chip {
+      transition: all 0.18s ease;
+    }
+    .single-chip.active {
+      background: #fef2f2;
+      border-color: #9b2335;
+      color: #7f1d1d;
+      font-weight: 700;
+    }
+    .emoji-btn {
+      transition: all 0.2s ease;
+      opacity: 0.35;
+    }
+    .emoji-btn.active {
+      opacity: 1;
+      transform: scale(1.25);
+    }
+    .emoji-btn:hover { opacity: 0.7; }
+
+    /* Modal */
+    #modalOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 999;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 0;
+    }
+    #modalOverlay.show { display: flex; }
+
+    .modal-sheet {
+      background: #fff;
+      border-radius: 28px 28px 0 0;
+      padding: 28px 24px 40px;
+      width: 100%;
+      max-width: 520px;
+      animation: slideUp 0.3s cubic-bezier(0.34,1.3,0.64,1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* Card enter animation */
+    .survey-card {
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .survey-card:nth-child(1)  { animation-delay: 0.05s; }
+    .survey-card:nth-child(2)  { animation-delay: 0.10s; }
+    .survey-card:nth-child(3)  { animation-delay: 0.15s; }
+    .survey-card:nth-child(4)  { animation-delay: 0.20s; }
+    .survey-card:nth-child(5)  { animation-delay: 0.25s; }
+    .survey-card:nth-child(6)  { animation-delay: 0.30s; }
+    .survey-card:nth-child(7)  { animation-delay: 0.35s; }
+    .survey-card:nth-child(8)  { animation-delay: 0.40s; }
+
+    /* Progress bar fill animation */
+    #progressFill { transition: width 0.4s ease; }
+
+    /* Success page */
+    #successPage { display: none; }
+    #successPage.show { display: flex; }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #9b2335;
+      box-shadow: 0 0 0 3px rgba(159,35,53,0.12);
+    }
+
+    textarea { resize: none; }
+  </style>
+</head>
+<body class="bg-stone-100 min-h-screen font-jakarta">
+
+<!-- ═══════════════════════════════════════
+     SURVEY PAGE
+═══════════════════════════════════════ -->
+<div id="surveyPage">
+
+  <!-- Header -->
+  <div class="bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700 text-white pt-10 pb-8 px-5 rounded-b-[32px] shadow-xl relative overflow-hidden">
+    <!-- Decorative circles -->
+    <div class="absolute -top-8 -right-8 w-40 h-40 bg-white/5 rounded-full"></div>
+    <div class="absolute top-4 -right-4 w-24 h-24 bg-white/5 rounded-full"></div>
+
+    <div class="max-w-xl mx-auto relative z-10">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="bg-white/15 backdrop-blur rounded-2xl p-3">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 22V12h6v10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white/60 text-[10px] font-600 tracking-widest uppercase">Bank Akasia Mas</p>
+          <h1 class="text-lg font-800 leading-tight">Survey Kepuasan Nasabah</h1>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="bg-white/10 rounded-2xl p-4">
+        <div class="flex justify-between text-xs text-white/70 mb-2">
+          <span>Progress pengisian</span>
+          <span id="progressLabel" class="text-white font-700">0 dari 8 pertanyaan</span>
+        </div>
+        <div class="bg-white/20 rounded-full h-2">
+          <div id="progressFill" class="bg-white rounded-full h-2" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="max-w-xl mx-auto px-4 pt-5 pb-10 space-y-4" id="formArea">
+
+    <!-- 01 Nama -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">01</span>
+        <h2 class="font-700 text-stone-800 text-sm">Identitas Anda</h2>
+      </div>
+      <input id="nama" type="text" placeholder="Nama lengkap Anda"
+        class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder-stone-400 transition-all"
+        oninput="updateProgress()">
+      <p class="text-[10px] text-stone-400 italic mt-2">**Identitas Bapak/Ibu dijaga kerahasiaannya</p>
+    </div>
+
+    <!-- 02 WhatsApp -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">02</span>
+        <h2 class="font-700 text-stone-800 text-sm">Nomor WhatsApp</h2>
+      </div>
+      <input id="whatsapp" type="tel" inputmode="numeric" placeholder="Contoh: 08123456789"
+        class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder-stone-400 transition-all"
+        oninput="updateProgress()">
+      <p class="text-[10px] text-stone-400 italic mt-2">**Nomor Bapak/Ibu dijaga kerahasiaannya</p>
+    </div>
+
+    <!-- 03 Produk -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">03</span>
+        <h2 class="font-700 text-stone-800 text-sm">Produk yang Dimiliki</h2>
+      </div>
+      <p class="text-[11px] text-stone-400 mb-4 ml-10">Pilih semua yang sesuai</p>
+      <div class="flex flex-wrap gap-2" id="produkGroup">
+        <button class="chip border border-stone-200 bg-stone-50 text-stone-600 text-sm px-4 py-2 rounded-full" data-value="Tabungan" onclick="toggleChip(this,'produkGroup')">Tabungan</button>
+        <button class="chip border border-stone-200 bg-stone-50 text-stone-600 text-sm px-4 py-2 rounded-full" data-value="Kredit" onclick="toggleChip(this,'produkGroup')">Kredit</button>
+        <button class="chip border border-stone-200 bg-stone-50 text-stone-600 text-sm px-4 py-2 rounded-full" data-value="Deposito" onclick="toggleChip(this,'produkGroup')">Deposito</button>
+      </div>
+    </div>
+
+    <!-- 04 Layanan -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">04</span>
+        <h2 class="font-700 text-stone-800 text-sm">Layanan yang Digunakan</h2>
+      </div>
+      <p class="text-[11px] text-stone-400 mb-4 ml-10">Pilih semua yang sesuai</p>
+      <div class="flex flex-wrap gap-2" id="layananGroup">
+        <button class="chip border border-stone-200 bg-stone-50 text-stone-600 text-sm px-4 py-2 rounded-full" data-value="ATM Cardless" onclick="toggleChip(this,'layananGroup')">ATM Cardless</button>
+        <button class="chip border border-stone-200 bg-stone-50 text-stone-600 text-sm px-4 py-2 rounded-full" data-value="Mobile Banking" onclick="toggleChip(this,'layananGroup')">Mobile Banking</button>
+        <button class="chip border border-stone-200 bg-stone-50 text-stone-600 text-sm px-4 py-2 rounded-full" data-value="Virtual Account" onclick="toggleChip(this,'layananGroup')">Virtual Account</button>
+        <button class="chip border border-stone-200 bg-stone-50 text-stone-600 text-sm px-4 py-2 rounded-full" data-value="eBilyet Deposito" onclick="toggleChip(this,'layananGroup')">eBilyet Deposito</button>
+      </div>
+    </div>
+
+    <!-- 05 SDM -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">05</span>
+        <h2 class="font-700 text-stone-800 text-sm">Kesiapan SDM</h2>
+      </div>
+      <p class="text-[11px] text-stone-400 mb-4 ml-10">Penilaian layanan teller & customer service</p>
+      <div class="grid grid-cols-2 gap-2" id="sdmGroup">
+        <button class="single-chip border border-stone-200 bg-stone-50 rounded-xl py-3 px-4 text-sm text-stone-600 text-left" data-value="Sangat Baik" onclick="selectSingle(this,'sdmGroup')">⭐ Sangat Baik</button>
+        <button class="single-chip border border-stone-200 bg-stone-50 rounded-xl py-3 px-4 text-sm text-stone-600 text-left" data-value="Baik" onclick="selectSingle(this,'sdmGroup')">👍 Baik</button>
+        <button class="single-chip border border-stone-200 bg-stone-50 rounded-xl py-3 px-4 text-sm text-stone-600 text-left" data-value="Tidak Baik" onclick="selectSingle(this,'sdmGroup')">👎 Tidak Baik</button>
+        <button class="single-chip border border-stone-200 bg-stone-50 rounded-xl py-3 px-4 text-sm text-stone-600 text-left" data-value="Sangat Tidak Baik" onclick="selectSingle(this,'sdmGroup')">😤 Sangat Tidak Baik</button>
+      </div>
+    </div>
+
+    <!-- 06 Penawaran -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">06</span>
+        <h2 class="font-700 text-stone-800 text-sm">Penawaran Solusi</h2>
+      </div>
+      <p class="text-[11px] text-stone-400 mb-4 ml-10">Apakah Teller/CS menawarkan solusi personal maupun bisnis?</p>
+      <div class="flex gap-3" id="penawaranGroup">
+        <button class="single-chip flex-1 border border-stone-200 bg-stone-50 rounded-xl py-3 text-sm text-stone-600" data-value="Pernah" onclick="selectSingle(this,'penawaranGroup')">✅ Pernah</button>
+        <button class="single-chip flex-1 border border-stone-200 bg-stone-50 rounded-xl py-3 text-sm text-stone-600" data-value="Belum Pernah" onclick="selectSingle(this,'penawaranGroup')">❌ Belum Pernah</button>
+      </div>
+    </div>
+
+    <!-- 07 Emoji Rating -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">07</span>
+        <h2 class="font-700 text-stone-800 text-sm">Layanan Keseluruhan</h2>
+      </div>
+      <p class="text-[11px] text-stone-400 mb-6 ml-10">Penilaian Bapak/Ibu secara keseluruhan</p>
+      <div class="flex justify-between px-1" id="emojiGroup">
+        <button class="emoji-btn flex flex-col items-center gap-1" data-value="1" onclick="selectEmoji(this)">
+          <span style="font-size:30px">😡</span>
+          <span class="text-[9px] text-stone-400">Sangat Buruk</span>
+        </button>
+        <button class="emoji-btn flex flex-col items-center gap-1" data-value="2" onclick="selectEmoji(this)">
+          <span style="font-size:30px">😕</span>
+          <span class="text-[9px] text-stone-400">Buruk</span>
+        </button>
+        <button class="emoji-btn flex flex-col items-center gap-1" data-value="3" onclick="selectEmoji(this)">
+          <span style="font-size:30px">😐</span>
+          <span class="text-[9px] text-stone-400">Cukup</span>
+        </button>
+        <button class="emoji-btn flex flex-col items-center gap-1" data-value="4" onclick="selectEmoji(this)">
+          <span style="font-size:30px">😊</span>
+          <span class="text-[9px] text-stone-400">Baik</span>
+        </button>
+        <button class="emoji-btn flex flex-col items-center gap-1" data-value="5" onclick="selectEmoji(this)">
+          <span style="font-size:30px">😍</span>
+          <span class="text-[9px] text-stone-400">Sangat Baik</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 08 Saran -->
+    <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">08</span>
+        <h2 class="font-700 text-stone-800 text-sm">Kritik & Saran</h2>
+      </div>
+      <p class="text-[11px] text-stone-400 mb-4 ml-10">Masukan Bapak/Ibu sangat berarti bagi kami</p>
+      <textarea id="saran" rows="4" placeholder="Tuliskan kritik dan saran Anda di sini..."
+        class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder-stone-400 transition-all"
+        oninput="updateProgress()"></textarea>
+    </div>
+
+    <!-- Submit Button -->
+    <button onclick="showModal()"
+      class="w-full bg-gradient-to-r from-brand-900 to-brand-700 hover:from-brand-800 hover:to-brand-600 active:scale-95 text-white font-700 py-4 rounded-2xl shadow-lg transition-all text-sm tracking-wide">
+      Kirim Jawaban &rarr;
+    </button>
+
+    <p class="text-center text-[10px] text-stone-400 pb-2">Bank Akasia Mas &middot; Data Anda aman bersama kami 🔒</p>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODAL IZIN KONTAK (Bottom Sheet)
+═══════════════════════════════════════ -->
+<div id="modalOverlay">
+  <div class="modal-sheet">
+    <!-- Handle -->
+    <div class="w-10 h-1 bg-stone-200 rounded-full mx-auto mb-6"></div>
+
+    <div class="flex flex-col items-center text-center">
+      <div class="w-14 h-14 bg-brand-50 rounded-full flex items-center justify-center mb-4">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.58.57a1 1 0 011 1V20a1 1 0 01-1 1C10.61 21 3 13.39 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.58a1 1 0 01-.25 1.01l-2.2 2.2z" fill="#7f1d1d"/>
+        </svg>
+      </div>
+      <h3 class="text-base font-800 text-stone-800 mb-2">Satu pertanyaan terakhir</h3>
+      <p class="text-sm text-stone-500 leading-relaxed mb-7">
+        Apakah Anda mengizinkan kami<br>menghubungi Anda di lain waktu?
+      </p>
+      <div class="flex gap-3 w-full">
+        <button onclick="submitData('Tidak')"
+          class="flex-1 py-3.5 rounded-xl border border-stone-200 text-stone-600 font-700 text-sm active:scale-95 transition-all hover:bg-stone-50">
+          Tidak
+        </button>
+        <button onclick="submitData('Ya')"
+          class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-brand-900 to-brand-700 text-white font-700 text-sm active:scale-95 transition-all hover:from-brand-800 hover:to-brand-600">
+          Ya, Izinkan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     SUCCESS PAGE
+═══════════════════════════════════════ -->
+<div id="successPage" class="fixed inset-0 bg-stone-100 flex-col items-center justify-center px-6 text-center z-50">
+  <div class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-xl border border-stone-100">
+    <!-- Animated checkmark -->
+    <div class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6" style="animation: popIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+        <path d="M20 6L9 17l-5-5" stroke="#7f1d1d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h2 class="text-2xl font-800 text-stone-800 mb-2">Terima Kasih!</h2>
+    <p class="text-stone-500 text-sm leading-relaxed mb-6">
+      Jawaban Anda telah berhasil kami terima.<br>
+      Kami sangat menghargai partisipasi<br>Bapak/Ibu dalam survey ini.
+    </p>
+    <div class="bg-brand-50 rounded-2xl px-5 py-4">
+      <p class="text-brand-800 text-xs font-600 leading-relaxed">
+        🏦 Bank Akasia Mas berkomitmen untuk terus meningkatkan layanan terbaik bagi Bapak/Ibu.
+      </p>
+    </div>
+  </div>
+  <p class="text-stone-400 text-[11px] mt-6">Bank Akasia Mas &middot; Data Anda aman bersama kami</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════ -->
+<script>
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyRnGzJ3KmUpKfz-vmiNLSWMa-muSQRo1UxHZ9iK8W7hkuxq9GnRK6nmyHndUtlUjD67Q/exec';
+
+  let selectedRating = null;
+  let answeredCount = 0;
+
+  function updateProgress() {
+    let count = 0;
+    if (document.getElementById('nama').value.trim()) count++;
+    if (document.getElementById('whatsapp').value.trim()) count++;
+    if (document.querySelectorAll('#produkGroup .chip.active').length > 0) count++;
+    if (document.querySelectorAll('#layananGroup .chip.active').length > 0) count++;
+    if (document.querySelector('#sdmGroup .single-chip.active')) count++;
+    if (document.querySelector('#penawaranGroup .single-chip.active')) count++;
+    if (selectedRating) count++;
+    if (document.getElementById('saran').value.trim()) count++;
+
+    answeredCount = count;
+    const pct = Math.round((count / 8) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = count + ' dari 8 pertanyaan';
+  }
+
+  function toggleChip(el, groupId) {
+    el.classList.toggle('active');
+    updateProgress();
+  }
+
+  function selectSingle(el, groupId) {
+    document.querySelectorAll('#' + groupId + ' .single-chip').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    updateProgress();
+  }
+
+  function selectEmoji(el) {
+    document.querySelectorAll('#emojiGroup .emoji-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    selectedRating = el.dataset.value;
+    updateProgress();
+  }
+
+  function getChipValues(groupId) {
+    return [...document.querySelectorAll('#' + groupId + ' .chip.active')].map(el => el.dataset.value);
+  }
+
+  function getSingleValue(groupId) {
+    const el = document.querySelector('#' + groupId + ' .single-chip.active');
+    return el ? el.dataset.value : '';
+  }
+
+  function showModal() {
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function submitData(izinKontak) {
+    document.getElementById('modalOverlay').classList.remove('show');
+
+    const data = {
+      nama:       document.getElementById('nama').value,
+      whatsapp:   document.getElementById('whatsapp').value,
+      produk:     getChipValues('produkGroup'),
+      layanan:    getChipValues('layananGroup'),
+      sdm:        getSingleValue('sdmGroup'),
+      penawaran:  getSingleValue('penawaranGroup'),
+      kepuasan:   selectedRating,
+      saran:      document.getElementById('saran').value,
+      izinKontak: izinKontak
+    };
+
+    /* ── Jika menggunakan Google Apps Script langsung ──
+    google.script.run
+      .withSuccessHandler(showSuccess)
+      .withFailureHandler(err => alert('Terjadi kesalahan: ' + err.message))
+      .submitForm(data);
+    */
+
+    /* ── Jika menggunakan GitHub Pages + fetch ── */
+    fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then(res => res.text())
+    .then(() => showSuccess())
+    .catch(() => alert('Terjadi kesalahan, mohon coba lagi.'));
+  }
+
+  function showSuccess() {
+    document.getElementById('surveyPage').style.display = 'none';
+    const s = document.getElementById('successPage');
+    s.classList.add('show');
+  }
+</script>
+
+<style>
+  @keyframes popIn {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+</style>
+
+</body>
+</html>
