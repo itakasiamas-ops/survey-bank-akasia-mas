@@ -272,7 +272,7 @@
       </div>
     </div>
 
-    <!-- 08 Saran -->
+    <!-- 08 Saran 
     <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
       <div class="flex items-center gap-2 mb-1">
         <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">08</span>
@@ -282,7 +282,7 @@
       <textarea id="saran" rows="4" placeholder="Tuliskan kritik dan saran Anda di sini..."
         class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder-stone-400 transition-all"
         oninput="updateProgress()"></textarea>
-    </div>
+    </div> -->
 
     <!-- Submit Button -->
     <button onclick="showModal()"
@@ -373,12 +373,12 @@
     if (document.querySelector('#sdmGroup .single-chip.active')) count++;
     if (document.querySelector('#penawaranGroup .single-chip.active')) count++;
     if (selectedRating) count++;
-    if (document.getElementById('saran').value.trim()) count++;
+  <!--  if (document.getElementById('saran').value.trim()) count++; -->
 
     answeredCount = count;
-    const pct = Math.round((count / 8) * 100);
+    const pct = Math.round((count / 7) * 100);
     document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressLabel').textContent = count + ' dari 8 pertanyaan';
+    document.getElementById('progressLabel').textContent = count + ' dari 7 pertanyaan';
   }
 
   function toggleChip(el, groupId) {
