@@ -413,7 +413,21 @@
   }
 
   function submitData(izinKontak) {
-    document.getElementById('modalOverlay').classList.remove('show');
+    function submitData(izinKontak) {
+  document.getElementById('modalOverlay').classList.remove('show');
+
+  // Tampilkan loading
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="loadingOverlay" style="
+      position:fixed; inset:0; background:rgba(0,0,0,0.4);
+      z-index:9999; display:flex; align-items:center; justify-content:center;
+    ">
+      <div style="background:#fff; border-radius:20px; padding:28px 36px; text-align:center;">
+        <div style="font-size:28px; margin-bottom:10px;">⏳</div>
+        <p style="font-size:14px; color:#555; margin:0;">Mengirim jawaban...</p>
+      </div>
+    </div>
+  `);
 
     const data = {
       nama:       document.getElementById('nama').value,
