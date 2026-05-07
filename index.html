@@ -441,6 +441,9 @@
       izinKontak: izinKontak
     };
 
+
+
+      
     /* ── Jika menggunakan Google Apps Script langsung ──
     google.script.run
       .withSuccessHandler(showSuccess)
@@ -448,16 +451,25 @@
       .submitForm(data);
     */
 
+
+
+      
     /* ── Jika menggunakan GitHub Pages + fetch ── */
     fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-    .then(res => res.text())
-    .then(() => showSuccess())
-    .catch(() => alert('Terjadi kesalahan, mohon coba lagi.'));
-  }
-
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.text())
+  .then(() => {
+    document.getElementById('loadingOverlay').remove(); // hapus loading
+    showSuccess();
+  })
+  .catch(() => {
+    document.getElementById('loadingOverlay').remove();
+    alert('Terjadi kesalahan, mohon coba lagi.');
+  });
+}
   function showSuccess() {
     document.getElementById('surveyPage').style.display = 'none';
     const s = document.getElementById('successPage');
