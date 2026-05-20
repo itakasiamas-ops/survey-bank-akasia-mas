@@ -150,7 +150,7 @@
       <div class="bg-white/10 rounded-2xl p-4">
         <div class="flex justify-between text-xs text-white/70 mb-2">
           <span>Progress pengisian</span>
-          <span id="progressLabel" class="text-white font-700">0 dari 8 pertanyaan</span>
+          <span id="progressLabel" class="text-white font-700">0 dari 7 pertanyaan</span>
         </div>
         <div class="bg-white/20 rounded-full h-2">
           <div id="progressFill" class="bg-white rounded-full h-2" style="width:0%"></div>
@@ -218,7 +218,7 @@
     <!-- 05 SDM -->
     <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
       <div class="flex items-center gap-2 mb-1">
-        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">05</span>
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">04</span>
         <h2 class="font-700 text-stone-800 text-sm">Kesiapan SDM</h2>
       </div>
       <p class="text-[11px] text-stone-400 mb-4 ml-10">Penilaian layanan teller & customer service</p>
@@ -259,7 +259,7 @@
     <!-- 06 Penawaran -->
     <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
       <div class="flex items-center gap-2 mb-1">
-        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">06</span>
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">05</span>
         <h2 class="font-700 text-stone-800 text-sm">Penawaran Solusi</h2>
       </div>
       <p class="text-[11px] text-stone-400 mb-4 ml-10">Apakah Teller/CS menawarkan solusi personal maupun bisnis?</p>
@@ -272,7 +272,7 @@
     <!-- 07 Emoji Rating -->
     <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
       <div class="flex items-center gap-2 mb-1">
-        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">07</span>
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">06</span>
         <h2 class="font-700 text-stone-800 text-sm">Layanan Keseluruhan</h2>
       </div>
       <p class="text-[11px] text-stone-400 mb-6 ml-10">Penilaian Bapak/Ibu secara keseluruhan</p>
@@ -300,16 +300,30 @@
       </div>
     </div>
 
-    <!-- 08 Saran -->
+    <!-- 07 Saran -->
     <div class="survey-card bg-white rounded-2xl p-5 shadow-sm border border-stone-100">
       <div class="flex items-center gap-2 mb-1">
-        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">08</span>
+        <span class="bg-brand-50 text-brand-800 text-[10px] font-800 px-2.5 py-1 rounded-full">07</span>
         <h2 class="font-700 text-stone-800 text-sm">Kritik & Saran</h2>
       </div>
-      <p class="text-[11px] text-stone-400 mb-4 ml-10">Masukan Bapak/Ibu sangat berarti bagi kami</p>
+      <p class="text-[11px] text-stone-400 mb-4 ml-10">Apakah Bapak/Ibu ingin menyampaikan kritik atau saran?</p>
+
+      <!-- Toggle Ya / Tidak -->
+      <div class="flex gap-2 mb-4" id="saranToggleGroup">
+        <button id="saranTidak" onclick="toggleSaran('tidak')"
+          class="single-chip flex-1 border border-stone-200 bg-stone-50 rounded-xl py-2.5 text-sm text-stone-600 font-600 active-saran transition-all">
+          ✖ Tidak
+        </button>
+        <button id="saranYa" onclick="toggleSaran('ya')"
+          class="single-chip flex-1 border border-stone-200 bg-stone-50 rounded-xl py-2.5 text-sm text-stone-600 font-600 transition-all">
+          ✏️ Ya, saya ingin mengisi
+        </button>
+      </div>
+
+      <!-- Textbox (default disabled) -->
       <textarea id="saran" rows="4" placeholder="Tuliskan kritik dan saran Anda di sini..."
-        class="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder-stone-400 transition-all"
-        oninput="updateProgress()"></textarea>
+        class="w-full bg-stone-200 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-400 placeholder-stone-400 transition-all cursor-not-allowed"
+        disabled oninput="updateProgress()"></textarea>
     </div>
 
     <!-- Submit Button -->
@@ -402,12 +416,12 @@
     if (document.querySelector('#sdmCSGroup .single-chip.active')) count++;
     if (document.querySelector('#penawaranGroup .single-chip.active')) count++;
     if (selectedRating) count++;
-    if (document.getElementById('saran').value.trim()) count++;
+    // saran opsional, tidak dihitung ke progress
 
     answeredCount = count;
-    const pct = Math.round((count / 8) * 100);
+    const pct = Math.round((count / 7) * 100);
     document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressLabel').textContent = count + ' dari 8 pertanyaan';
+    document.getElementById('progressLabel').textContent = count + ' dari 7 pertanyaan';
   }
 
   function toggleChip(el, groupId) {
@@ -435,6 +449,26 @@
   function getSingleValue(groupId) {
     const el = document.querySelector('#' + groupId + ' .single-chip.active');
     return el ? el.dataset.value : '';
+  }
+
+  function toggleSaran(pilihan) {
+    const textarea  = document.getElementById('saran');
+    const btnYa     = document.getElementById('saranYa');
+    const btnTidak  = document.getElementById('saranTidak');
+
+    if (pilihan === 'ya') {
+      textarea.disabled = false;
+      textarea.className = 'w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-700 placeholder-stone-400 transition-all';
+      textarea.focus();
+      btnYa.classList.add('active');
+      btnTidak.classList.remove('active');
+    } else {
+      textarea.disabled = true;
+      textarea.value = '';
+      textarea.className = 'w-full bg-stone-200 border border-stone-200 rounded-xl px-4 py-3 text-sm text-stone-400 placeholder-stone-400 transition-all cursor-not-allowed';
+      btnTidak.classList.add('active');
+      btnYa.classList.remove('active');
+    }
   }
 
   function switchSDMTab(tab) {
